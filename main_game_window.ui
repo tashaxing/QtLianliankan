@@ -6,50 +6,52 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>618</width>
-    <height>401</height>
+    <width>746</width>
+    <height>604</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>746</width>
+    <height>604</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>746</width>
+    <height>604</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>MainGameWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QWidget" name="">
+   <widget class="QProgressBar" name="timeBar">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>301</width>
-      <height>23</height>
+      <x>58</x>
+      <y>11</y>
+      <width>561</width>
+      <height>20</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>时间：</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QProgressBar" name="progressBar">
-       <property name="value">
-        <number>24</number>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <property name="value">
+     <number>24</number>
+    </property>
    </widget>
-  </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>618</width>
-     <height>22</height>
-    </rect>
-   </property>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>11</x>
+      <y>11</y>
+      <width>39</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>时间：</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

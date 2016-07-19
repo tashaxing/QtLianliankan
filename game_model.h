@@ -3,10 +3,10 @@
 
 // ------------ 全局变量 ------------ //
 // 最大行和列数
-static const int MAX_ROW = 20;
-static const int MAX_COL = 20;
+const int MAX_ROW = 15;
+const int MAX_COL = 20;
 // 游戏可玩图片数量
-static const int MAX_ICON = 25;
+const int MAX_ICON = 25;
 // 游戏状态
 enum GameStatus
 {
@@ -32,7 +32,7 @@ public:
     virtual ~GameModel();
 public:
     void startGame(); // 开始游戏
-    int *gatGameMap();    // 获得地图
+    int *getGameMap();    // 获得地图
     GameStatus checkGameStatus(); // 判断获得游戏状态，是否输赢
     bool linkTwoTiles(int srcX, int srcY, int dstX,int dstY); // 连接起点和终点方块，连接是否成功
 private:
