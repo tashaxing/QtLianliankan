@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QPushButton>
+#include <QWidget>
 #include <QTimer>
 #include "game_model.h"
 
@@ -24,10 +25,10 @@ private:
     Ui::MainGameWindow *ui;
     GameModel *game; // 游戏模型
     QPushButton *imageButton[MAX_ROW * MAX_COL]; // 图片button数组
-    QTimer *gameTimer;
+    QTimer *gameTimer; // 游戏计时器
 
 private slots:
-    void onIconButtonClicked(); // icon点击到响应
+    void onIconButtonPressed(); // icon点击到响应
     void gameTimerEvent();
 };
 

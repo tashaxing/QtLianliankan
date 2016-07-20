@@ -4,8 +4,8 @@
 
 // --------- 全局变量 --------- //
 const int kIconSize = 36;
-const int kTopMargin = 50;
-const int kLeftMargin = 10;
+const int kTopMargin = 70;
+const int kLeftMargin = 50;
 const int kIconMargin = 5;
 // -------------------------- //
 
@@ -45,8 +45,8 @@ void MainGameWindow::initGame()
         imageButton[i]->setIcon(icon);
         imageButton[i]->setIconSize(QSize(kIconSize, kIconSize));
         imageButton[i]->show();
-        imageButton[i]->setPalette(QPalette(Qt::lightGray));
-        connect(imageButton[i], SIGNAL(clicked()), this, SLOT(onIconButtonClicked()));
+//        imageButton[i]->setPalette(QPalette(Qt::lightGray));
+        connect(imageButton[i], SIGNAL(pressed()), this, SLOT(onIconButtonPressed()));
     }
 
     // 进度条
@@ -60,10 +60,12 @@ void MainGameWindow::initGame()
     gameTimer->start(300);
 }
 
-void MainGameWindow::onIconButtonClicked()
+void MainGameWindow::onIconButtonPressed()
 {
-    QPushButton *iconButton = (QPushButton *)sender();
-    qDebug() << "icon clicked";
+    QPushButton *iconButton = dynamic_cast<QPushButton *>(sender());
+    iconButton->setStyleSheet("background-color: rgba(255, 255, 12, 161)");
+
+    qDebug() << "icon pressed";
 }
 
 void MainGameWindow::gameTimerEvent()

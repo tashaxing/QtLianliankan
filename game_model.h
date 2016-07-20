@@ -34,7 +34,7 @@ public:
     void startGame(); // 开始游戏
     int *getGameMap();    // 获得地图
     GameStatus checkGameStatus(); // 判断获得游戏状态，是否输赢
-    bool linkTwoTiles(int srcX, int srcY, int dstX,int dstY); // 连接起点和终点方块，连接是否成功
+    void linkTwoTiles(int srcX, int srcY, int dstX,int dstY); // 连接起点和终点方块，连接是否成功
 private:
     // 游戏地图，存储方块，0表示消失，1-其他数字表示图片标号
     int *gameMap;

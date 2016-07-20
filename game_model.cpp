@@ -48,15 +48,25 @@ void GameModel::startGame()
 
 int *GameModel::getGameMap()
 {
+
     return gameMap;
 }
 
 bool GameModel::isCanLink(int srcX, int srcY, int dstX, int dstY)
 {
+    // 判断方块是否可以连，可用于实际的连接消除和提示消除
+    if(gameMap[MAX_COL * srcY + srcX] == gameMap[MAX_COL * dstY + dstX])
+    {
+        return true;
+    }
     return false;
 }
 
-bool GameModel::linkTwoTiles(int srcX, int srcY, int dstX, int dstY)
+void GameModel::linkTwoTiles(int srcX, int srcY, int dstX, int dstY)
 {
-    return false;
+    if(isCanLink(srcX, srcY, dstX, dstY))
+    {
+        gameMap[MAX_COL * srcY + srcX] = 0;
+        gameMap[MAX_COL * dstY + dstX] = 0;
+    }
 }
