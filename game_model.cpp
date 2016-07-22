@@ -55,6 +55,7 @@ int *GameModel::getGameMap()
 bool GameModel::isCanLink(int srcX, int srcY, int dstX, int dstY)
 {
     // 判断方块是否可以连，可用于实际的连接消除和提示消除
+    // x表示横向索引，y表示纵向索引，从0开始
     if(gameMap[MAX_COL * srcY + srcX] == gameMap[MAX_COL * dstY + dstX])
     {
         return true;
@@ -62,11 +63,15 @@ bool GameModel::isCanLink(int srcX, int srcY, int dstX, int dstY)
     return false;
 }
 
-void GameModel::linkTwoTiles(int srcX, int srcY, int dstX, int dstY)
+bool GameModel::linkTwoTiles(int srcX, int srcY, int dstX, int dstY)
 {
+    // 成功连接就返回true否则false用于GUI里面判断
     if(isCanLink(srcX, srcY, dstX, dstY))
     {
         gameMap[MAX_COL * srcY + srcX] = 0;
         gameMap[MAX_COL * dstY + dstX] = 0;
+
+        return true;
     }
+    return false;
 }
