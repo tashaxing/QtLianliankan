@@ -5,6 +5,7 @@
 #include <QPushButton>
 #include <QWidget>
 #include <QTimer>
+#include <QMediaPlayer>
 #include "game_model.h"
 
 namespace Ui {
@@ -41,6 +42,8 @@ private:
     IconButton *imageButton[MAX_ROW * MAX_COL]; // 图片button数组
     QTimer *gameTimer; // 游戏计时器
     IconButton *preIcon, *curIcon; // 记录点击的icon
+
+    QMediaPlayer *audioPlayer; // 音乐播放器
 
 private slots:
     void onIconButtonPressed(); // icon点击到响应

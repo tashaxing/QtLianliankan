@@ -25,5 +25,8 @@
         <file>res/image/23.png</file>
         <file>res/image/24.png</file>
         <file>res/image/25.png</file>
+        <file>res/sound/pair.wav</file>
+        <file>res/sound/release.wav</file>
+        <file>res/sound/select.wav</file>
     </qresource>
 </RCC>

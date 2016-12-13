@@ -1,4 +1,7 @@
 #include <QDebug>
+#include <QSound>
+#include <QMessageBox>
+#include <QDir>
 #include "main_game_window.h"
 #include "ui_main_game_window.h"
 
@@ -65,6 +68,18 @@ void MainGameWindow::initGame()
     gameTimer = new QTimer(this);
     connect(gameTimer, SIGNAL(timeout()), this, SLOT(gameTimerEvent()));
     gameTimer->start(300);
+
+    // 播放背景音乐(QMediaPlayer只能播放绝对路径文件)
+    audioPlayer = new QMediaPlayer(this);
+    QString curDir = QCoreApplication::applicationDirPath(); // 这个api获取路径在不同系统下不一样,mac 下需要截取路径
+    QStringList sections = curDir.split(QRegExp("[/]"));
+    QString musicPath;
+
+    for (int i = 0; i < sections.size() - 3; i++)
+        musicPath += sections[i] + "/";
+
+    audioPlayer->setMedia(QUrl::fromLocalFile(musicPath + "res/sound/backgrand.mp3"));
+    audioPlayer->play();
 }
 
 void MainGameWindow::onIconButtonPressed()
@@ -74,6 +89,9 @@ void MainGameWindow::onIconButtonPressed()
 
     if(!preIcon)
     {
+        // 播放音效
+        QSound::play(":/res/sound/select.wav");
+
         // 如果单击一个icon
         curIcon->setStyleSheet(kIconClickedStyle);
         preIcon = curIcon;
@@ -86,12 +104,18 @@ void MainGameWindow::onIconButtonPressed()
             curIcon->setStyleSheet(kIconClickedStyle);
             if(game->linkTwoTiles(preIcon->xID, preIcon->yID, curIcon->xID, curIcon->yID))
             {
+                // 播放音效
+                QSound::play(":/res/sound/pair.wav");
+
                 // 消除成功，隐藏掉
                 preIcon->hide();
                 curIcon->hide();
             }
             else
             {
+                // 播放音效
+                QSound::play(":/res/sound/release.wav");
+
                 // 消除失败，恢复
                 preIcon->setStyleSheet(kIconReleasedStyle);
                 curIcon->setStyleSheet(kIconReleasedStyle);
@@ -102,6 +126,9 @@ void MainGameWindow::onIconButtonPressed()
         }
         else if(curIcon == preIcon)
         {
+            // 播放音效
+            QSound::play(":/res/sound/release.wav");
+
             preIcon->setStyleSheet(kIconReleasedStyle);
             curIcon->setStyleSheet(kIconReleasedStyle);
             preIcon = NULL;
@@ -115,8 +142,8 @@ void MainGameWindow::gameTimerEvent()
     // 进度条计时效果
     if(ui->timeBar->value() == 0)
     {
-        qDebug() << "game over";
         gameTimer->stop();
+        QMessageBox::information(this, "game over", "play again>_<");
     }
     else
     {
