@@ -40,6 +40,7 @@ public:
     int *getGameMap();    // 获得地图
     GameStatus checkGameStatus(); // 判断获得游戏状态，是否输赢
     bool linkTwoTiles(int srcX, int srcY, int dstX,int dstY); // 连接起点和终点方块，连接是否成功
+    bool isFrozen(); // 判断是否已经成为了僵局
     int *getHint(); // 获得提示
 private:
     // 游戏地图，存储方块，0表示消失，1-其他数字表示图片标号
@@ -59,8 +60,7 @@ private:
     bool canLinkWithOneCorner(int srcX, int srcY, int dstX, int dstY);
     bool canLinkWithTwoCorner(int srcX, int srcY, int dstX, int dstY);
 
-    // 判断是否已经成为了僵局
-    bool isFrozen();
+
 };
 
 #endif // GAMEMODEL_H

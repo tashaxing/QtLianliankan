@@ -34,8 +34,8 @@ public:
     explicit MainGameWindow(QWidget *parent = 0);
     virtual ~MainGameWindow();
 
-public:
-    void initGame(); // 初始化游戏
+    virtual void paintEvent(QPaintEvent *event);
+
 private:
     Ui::MainGameWindow *ui;
     GameModel *game; // 游戏模型
@@ -45,9 +45,12 @@ private:
 
     QMediaPlayer *audioPlayer; // 音乐播放器
 
+    void initGame(); // 初始化游戏
+
 private slots:
     void onIconButtonPressed(); // icon点击到响应
     void gameTimerEvent();
+    void on_hintBtn_clicked(); // 提示按钮
 };
 
 #endif // MAIN_GAME_WINDOW_H

@@ -43,7 +43,7 @@
      <string>时间：</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="hintBtn">
     <property name="geometry">
      <rect>
       <x>650</x>
@@ -56,7 +56,7 @@
      <string notr="true">background-color: rgba(11, 255, 36, 161);</string>
     </property>
     <property name="text">
-     <string>PushButton</string>
+     <string>hints</string>
     </property>
    </widget>
   </widget>

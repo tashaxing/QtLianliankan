@@ -100,7 +100,7 @@ bool GameModel::isFrozen()
             // 只要能找到可以连接的就不为僵局
             if (isCanLink(srcX, srcY, dstX, dstY))
             {
-                // 记录hint
+                // 记录第一个可以连接的hint
                 hintArray[0] = srcX;
                 hintArray[1] = srcY;
                 hintArray[2] = dstX;
@@ -111,6 +111,11 @@ bool GameModel::isFrozen()
         }
 
     return true;
+}
+
+int *GameModel::getHint()
+{
+    return hintArray;
 }
 
 // 最重要的判断连接算法
@@ -153,44 +158,20 @@ bool GameModel::canLinkWithOneCorner(int srcX, int srcY, int dstX, int dstY)
         std::swap(srcY, dstY);
     }
 
-    // 先确定拐点，再确定线路,2种情况，4个点
+    // 先确定拐点，再确定直连线路,2种情况，4个点
     if (dstY > srcY)
     {
         if (gameMap[srcY * MAX_COL + dstX] == 0)
         {
             // 右上角
-
-            // 判断路线
-            for (int x = srcX + 1; x < dstX; x++)
-            {
-                if (gameMap[srcY * MAX_COL + x])
-                    return false;
-            }
-
-            for (int y = srcY + 1; y < dstY; y++)
-            {
-                if (gameMap[y * MAX_COL + dstX])
-                    return false;
-            }
-
-            return true;
+            if (canLinkDirectly(srcX, srcY, dstX, srcY) && canLinkDirectly(dstX, srcY, dstX, dstY))
+                return true;
         }
         else if (gameMap[dstY * MAX_COL + srcX] == 0)
         {
             // 左下角
-            for (int y = srcY + 1; y < dstY; y++)
-            {
-                if (gameMap[y * MAX_COL + srcX])
-                    return false;
-            }
-
-            for (int x = srcX + 1; x < dstX; x++)
-            {
-                if (gameMap[dstY * MAX_COL + x])
-                    return false;
-            }
-
-            return true;
+            if (canLinkDirectly(srcX, srcY, srcX, dstY) && canLinkDirectly(srcX, dstY, dstX, dstY))
+                return true;
         }
     }
     else
@@ -198,35 +179,14 @@ bool GameModel::canLinkWithOneCorner(int srcX, int srcY, int dstX, int dstY)
         if (gameMap[dstY * MAX_COL + srcX] == 0)
         {
             // 左上角
-            for (int y = dstY + 1; y < srcY; y++)
-            {
-                if (gameMap[y * MAX_COL + srcX])
-                    return false;
-            }
-
-            for (int x = srcX + 1; x < dstX; x++)
-            {
-                if (gameMap[dstY * MAX_COL + x])
-                    return false;
-            }
-
-            return true;
+            if (canLinkDirectly(srcX, srcY, srcX, dstY) && canLinkDirectly(srcX, dstY, dstX, dstY))
+                return true;
         }
         else if (gameMap[srcY * MAX_COL + dstX] == 0)
         {
-            for (int x = srcX + 1; x < dstX; x++)
-            {
-                if (gameMap[srcY * MAX_COL + x])
-                    return false;
-            }
-
-            for (int y = dstY + 1; y < srcY; y++)
-            {
-                if (gameMap[y * MAX_COL + dstX])
-                    return false;
-            }
-
-            return true;
+            // 右下角
+            if (canLinkDirectly(srcX, srcY, dstX, srcY) && canLinkDirectly(dstX, srcY, dstX, dstY))
+                return true;
         }
     }
 
@@ -235,6 +195,47 @@ bool GameModel::canLinkWithOneCorner(int srcX, int srcY, int dstX, int dstY)
 
 bool GameModel::canLinkWithTwoCorner(int srcX, int srcY, int dstX, int dstY)
 {
+    if (srcX > dstX)
+    {
+        // 统一化，方便后续处理
+        std::swap(srcX, dstX);
+        std::swap(srcY, dstY);
+    }
+
+    // 两种情况，横向垂线和竖向垂线，以src点作为基准遍历，双折线由直线和一折现构成
+    // 常规情况
+    for (int y = 0; y < MAX_ROW; y++)
+    {
+        if (y != srcY && y != dstY)
+        {
+            if (gameMap[y * MAX_COL + srcX] == 0
+                    && canLinkDirectly(srcX, srcY, srcX, y)
+                    && canLinkWithOneCorner(srcX, y, dstX, dstY))
+                return true;
+        }
+    }
+
+    for (int x = 0; x < MAX_COL; x++)
+    {
+        if (x != srcX && x != dstX)
+        {
+            if (gameMap[srcY * MAX_COL + x] == 0
+                    && canLinkDirectly(srcX, srcY, x, srcY)
+                    && canLinkWithOneCorner(x, srcY, dstX, dstY))
+                return true;
+        }
+    }
+
+    // 边缘情况,（分开写便于记录路径)
+    if (srcX == 0 && dstX == 0)
+        return true;
+    if (srcX == MAX_COL - 1 && dstX == MAX_COL - 1)
+        return true;
+    if (srcY == 0 && dstY == 0)
+        return true;
+    if (srcY == MAX_ROW - 1 && srcX == MAX_ROW - 1)
+        return true;
+
     return false;
 }
 
@@ -243,9 +244,12 @@ bool GameModel::isCanLink(int srcX, int srcY, int dstX, int dstY)
     // 首先判断点击的两个方块不是同一个不是空，且方块相同
     // 判断方块是否可以连，可用于实际的连接消除和提示消除
     // x表示横向索引，y表示纵向索引，从0开始
-    // 分3种情况往下找，找到一种情况可以连通就返回true，并选用这种连接情况
+    // 分3种情况往下找，每一种都可以用前面简单情况组合找到一种情况可以连通就返回true，并选用这种连接情况
 
-    if (srcX == dstY && srcY == dstY)
+    if (gameMap[srcY * MAX_COL + srcX] == 0 || gameMap[dstY * MAX_COL + dstX] == 0)
+        return false;
+
+    if (srcX == dstX && srcY == dstY)
         return false;
 
     if(gameMap[MAX_COL * srcY + srcX] != gameMap[MAX_COL * dstY + dstX])
@@ -273,10 +277,11 @@ bool GameModel::linkTwoTiles(int srcX, int srcY, int dstX, int dstY)
     // 成功连接就返回true否则false用于GUI里面判断
     if(isCanLink(srcX, srcY, dstX, dstY))
     {
+        // 值重置
         gameMap[MAX_COL * srcY + srcX] = 0;
-        gameMap[MAX_COL * dstY + dstX] = 0;
-
+        gameMap[MAX_COL * dstY + dstX] = 0;        
         return true;
     }
+
     return false;
 }
