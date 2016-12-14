@@ -37,26 +37,36 @@ void MainGameWindow::initGame()
 {
     // 启动游戏
     game = new GameModel;
-    game->startGame();
+    game->startGame(MEDIUM);
+
+    for (int i = 0; i < MAX_ROW * MAX_COL; i++)
+        qDebug() << game->getGameMap()[i];
 
     // 添加button
     for(int i = 0; i < MAX_ROW * MAX_COL; i++)
     {
-        imageButton[i] = new IconButton(this);
-        imageButton[i]->setGeometry(kLeftMargin + (i % MAX_COL) * kIconSize, kTopMargin + (i / MAX_COL) * kIconSize, kIconSize, kIconSize);
-        // 设置索引
-        imageButton[i]->xID = i % MAX_COL;
-        imageButton[i]->yID = i / MAX_COL;
-        // 设置图片
-        QPixmap iconPix;
-        QString fileString;
-        fileString.sprintf(":/res/image/%d.png", game->getGameMap()[i]);
-        iconPix.load(fileString);
-        QIcon icon(iconPix);
-        imageButton[i]->setIcon(icon);
-        imageButton[i]->setIconSize(QSize(kIconSize, kIconSize));
-        imageButton[i]->show();
-        connect(imageButton[i], SIGNAL(pressed()), this, SLOT(onIconButtonPressed()));
+        if (game->getGameMap()[i])
+        {
+            // 有方块就创建button
+            imageButton[i] = new IconButton(this);
+            imageButton[i]->setGeometry(kLeftMargin + (i % MAX_COL) * kIconSize, kTopMargin + (i / MAX_COL) * kIconSize, kIconSize, kIconSize);
+            // 设置索引
+            imageButton[i]->xID = i % MAX_COL;
+            imageButton[i]->yID = i / MAX_COL;
+            // 设置图片
+            QPixmap iconPix;
+            QString fileString;
+            fileString.sprintf(":/res/image/%d.png", game->getGameMap()[i]);
+            iconPix.load(fileString);
+            QIcon icon(iconPix);
+            imageButton[i]->setIcon(icon);
+            imageButton[i]->setIconSize(QSize(kIconSize, kIconSize));
+            // 如果是空白的就隐藏
+            imageButton[i]->show();
+            connect(imageButton[i], SIGNAL(pressed()), this, SLOT(onIconButtonPressed()));
+
+        }
+
     }
 
     // 进度条
@@ -143,7 +153,7 @@ void MainGameWindow::gameTimerEvent()
     if(ui->timeBar->value() == 0)
     {
         gameTimer->stop();
-        QMessageBox::information(this, "game over", "play again>_<");
+//        QMessageBox::information(this, "game over", "play again>_<");
     }
     else
     {
