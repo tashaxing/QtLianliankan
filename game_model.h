@@ -1,6 +1,8 @@
 #ifndef GAMEMODEL_H
 #define GAMEMODEL_H
 
+#include <vector>
+
 // ------------ 全局变量 ------------ //
 // 最大行和列数
 const int MAX_ROW = 15;
@@ -27,6 +29,14 @@ enum GameLevel
     HARD
 };
 
+// 用于绘制线段的点
+struct PaintPoint
+{
+    PaintPoint(int _x, int _y) : x(_x), y (_y) {}
+    int x;
+    int y;
+};
+
 // -------------------------------- //
 
 class GameModel
@@ -42,6 +52,7 @@ public:
     bool linkTwoTiles(int srcX, int srcY, int dstX,int dstY); // 连接起点和终点方块，连接是否成功
     bool isFrozen(); // 判断是否已经成为了僵局
     int *getHint(); // 获得提示
+    std::vector<PaintPoint> paintPoints; // 用于绘制的点
 private:
     // 游戏地图，存储方块，0表示消失，1-其他数字表示图片标号
     int *gameMap;

@@ -69,6 +69,8 @@ void GameModel::startGame(GameLevel level)
         std::swap(gameMap[i], gameMap[randomID]);
     }
 
+    // 初始化绘制点
+    paintPoints.clear();
 }
 
 // 重载
@@ -131,6 +133,10 @@ bool GameModel::canLinkDirectly(int srcX, int srcY, int dstX, int dstY)
                 return false;
 
         // 记录点和路线
+        PaintPoint p1(srcX, srcY), p2(dstX, dstY);
+        paintPoints.push_back(p1);
+        paintPoints.push_back(p2);
+
         return true;
     }
 
@@ -143,6 +149,9 @@ bool GameModel::canLinkDirectly(int srcX, int srcY, int dstX, int dstY)
             if (gameMap[MAX_COL * srcY + x])
                 return false;
 
+        PaintPoint p1(srcX, srcY), p2(dstX, dstY);
+        paintPoints.push_back(p1);
+        paintPoints.push_back(p2);
         return true;
     }
 
@@ -165,13 +174,27 @@ bool GameModel::canLinkWithOneCorner(int srcX, int srcY, int dstX, int dstY)
         {
             // 右上角
             if (canLinkDirectly(srcX, srcY, dstX, srcY) && canLinkDirectly(dstX, srcY, dstX, dstY))
+            {
+                PaintPoint p1(srcX, srcY), p2(dstX, srcY), p3(dstX, dstY);
+                paintPoints.push_back(p1);
+                paintPoints.push_back(p2);
+                paintPoints.push_back(p3);
                 return true;
+            }
+
         }
         else if (gameMap[dstY * MAX_COL + srcX] == 0)
         {
             // 左下角
             if (canLinkDirectly(srcX, srcY, srcX, dstY) && canLinkDirectly(srcX, dstY, dstX, dstY))
+            {
+                PaintPoint p1(srcX, srcY), p2(srcX, dstY), p3(dstX, dstY);
+                paintPoints.push_back(p1);
+                paintPoints.push_back(p2);
+                paintPoints.push_back(p3);
                 return true;
+            }
+
         }
     }
     else
@@ -180,13 +203,27 @@ bool GameModel::canLinkWithOneCorner(int srcX, int srcY, int dstX, int dstY)
         {
             // 左上角
             if (canLinkDirectly(srcX, srcY, srcX, dstY) && canLinkDirectly(srcX, dstY, dstX, dstY))
+            {
+                PaintPoint p1(srcX, srcY), p2(srcX, dstY), p3(dstX, dstY);
+                paintPoints.push_back(p1);
+                paintPoints.push_back(p2);
+                paintPoints.push_back(p3);
                 return true;
+            }
+
         }
         else if (gameMap[srcY * MAX_COL + dstX] == 0)
         {
             // 右下角
             if (canLinkDirectly(srcX, srcY, dstX, srcY) && canLinkDirectly(dstX, srcY, dstX, dstY))
+            {
+                PaintPoint p1(srcX, srcY), p2(dstX, srcY), p3(dstX, dstY);
+                paintPoints.push_back(p1);
+                paintPoints.push_back(p2);
+                paintPoints.push_back(p3);
                 return true;
+            }
+
         }
     }
 

@@ -1,7 +1,8 @@
 #include <QDebug>
 #include <QSound>
 #include <QMessageBox>
-#include <QDir>
+#include <QPainter>
+#include <QLine>
 #include "main_game_window.h"
 #include "ui_main_game_window.h"
 
@@ -125,7 +126,6 @@ void MainGameWindow::onIconButtonPressed()
                     QMessageBox::information(this, "oops", "dead game");
 
                 int *hints = game->getHint();
-                qDebug() << hints[0] << hints[1] << hints[2] << hints[3] << endl;
             }
             else
             {
@@ -155,6 +155,18 @@ void MainGameWindow::onIconButtonPressed()
 
 void MainGameWindow::paintEvent(QPaintEvent *event)
 {
+    QPainter painter(this);
+    painter.setPen(Qt::green);
+    qDebug() << game->paintPoints.size();
+//    for (size_t i = 0; i < game->paintPoints.size() - 1; i++)
+//    {
+//        PaintPoint p1 = game->paintPoints[i];
+//        PaintPoint p2 = game->paintPoints[i + 1];
+//        QPoint pos1 = imageButton[p1.y * MAX_COL + p1.x]->pos();
+//        QPoint pos2 = imageButton[p2.y * MAX_COL + p2.x]->pos();
+
+//        painter.drawLine(pos1, pos2);
+//    }
 
 }
 
