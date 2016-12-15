@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QSound>
+#include <QTimer>
 #include <QMessageBox>
 #include <QPainter>
 #include <QLine>
@@ -47,15 +48,17 @@ void MainGameWindow::initGame()
     // 添加button
     for(int i = 0; i < MAX_ROW * MAX_COL; i++)
     {
+        imageButton[i] = new IconButton(this);
+        imageButton[i]->setGeometry(kLeftMargin + (i % MAX_COL) * kIconSize, kTopMargin + (i / MAX_COL) * kIconSize, kIconSize, kIconSize);
+        // 设置索引
+        imageButton[i]->xID = i % MAX_COL;
+        imageButton[i]->yID = i / MAX_COL;
+
+        imageButton[i]->show();
+
         if (game->getGameMap()[i])
         {
-            // 有方块就创建button
-            imageButton[i] = new IconButton(this);
-            imageButton[i]->setGeometry(kLeftMargin + (i % MAX_COL) * kIconSize, kTopMargin + (i / MAX_COL) * kIconSize, kIconSize, kIconSize);
-            // 设置索引
-            imageButton[i]->xID = i % MAX_COL;
-            imageButton[i]->yID = i / MAX_COL;
-            // 设置图片
+            // 有方块就设置图片
             QPixmap iconPix;
             QString fileString;
             fileString.sprintf(":/res/image/%d.png", game->getGameMap()[i]);
@@ -63,12 +66,14 @@ void MainGameWindow::initGame()
             QIcon icon(iconPix);
             imageButton[i]->setIcon(icon);
             imageButton[i]->setIconSize(QSize(kIconSize, kIconSize));
-            // 如果是空白的就隐藏
-            imageButton[i]->show();
+
             // 添加按下的信号槽
             connect(imageButton[i], SIGNAL(pressed()), this, SLOT(onIconButtonPressed()));
-
         }
+        else
+            imageButton[i]->hide();
+
+
 
     }
 
@@ -131,6 +136,10 @@ void MainGameWindow::onIconButtonPressed()
                 if (game->isFrozen())
                     QMessageBox::information(this, "oops", "dead game");
 
+                // 检查是否胜利
+                if (game->isWin())
+                    QMessageBox::information(this, "great", "you win");
+
                 int *hints = game->getHint();
             }
             else
@@ -183,8 +192,60 @@ bool MainGameWindow::eventFilter(QObject *watched, QEvent *event)
         {
             PaintPoint p1 = game->paintPoints[i];
             PaintPoint p2 = game->paintPoints[i + 1];
-            QPoint btn_pos1 = imageButton[p1.y * MAX_COL + p1.x]->pos();
-            QPoint btn_pos2 = imageButton[p2.y * MAX_COL + p2.x]->pos();
+
+            // 拿到各button的坐标,注意边缘点坐标
+            QPoint btn_pos1;
+            QPoint btn_pos2;
+
+            // p1
+            if (p1.x == -1)
+            {
+                btn_pos1 = imageButton[p1.y * MAX_COL + 0]->pos();
+                btn_pos1 = QPoint(btn_pos1.x() - kIconSize, btn_pos1.y());
+            }
+            else if (p1.x == MAX_COL)
+            {
+                btn_pos1 = imageButton[p1.y * MAX_COL + MAX_COL - 1]->pos();
+                btn_pos1 = QPoint(btn_pos1.x() + kIconSize, btn_pos1.y());
+            }
+            else if (p1.y == -1)
+            {
+                btn_pos1 = imageButton[0 + p1.x]->pos();
+                btn_pos1 = QPoint(btn_pos1.x(), btn_pos1.y() - kIconSize);
+            }
+            else if (p1.y == MAX_ROW)
+            {
+                btn_pos1 = imageButton[(MAX_ROW - 1) * MAX_COL + p1.x]->pos();
+                btn_pos1 = QPoint(btn_pos1.x(), btn_pos1.y() + kIconSize);
+            }
+            else
+                btn_pos1 = imageButton[p1.y * MAX_COL + p1.x]->pos();
+
+            // p2
+            if (p2.x == -1)
+            {
+                btn_pos2 = imageButton[p2.y * MAX_COL + 0]->pos();
+                btn_pos2 = QPoint(btn_pos2.x() - kIconSize, btn_pos2.y());
+            }
+            else if (p2.x == MAX_COL)
+            {
+                btn_pos2 = imageButton[p2.y * MAX_COL + MAX_COL - 1]->pos();
+                btn_pos2 = QPoint(btn_pos2.x() + kIconSize, btn_pos2.y());
+            }
+            else if (p2.y == -1)
+            {
+                btn_pos2 = imageButton[0 + p2.x]->pos();
+                btn_pos2 = QPoint(btn_pos2.x(), btn_pos2.y() - kIconSize);
+            }
+            else if (p2.y == MAX_ROW)
+            {
+                btn_pos2 = imageButton[(MAX_ROW - 1) * MAX_COL + p2.x]->pos();
+                btn_pos2 = QPoint(btn_pos2.x(), btn_pos2.y() + kIconSize);
+            }
+            else
+                btn_pos2 = imageButton[p2.y * MAX_COL + p2.x]->pos();
+
+
 
             // 中心点
             QPoint pos1(btn_pos1.x() + kIconSize / 2, btn_pos1.y() + kIconSize / 2);
@@ -198,7 +259,6 @@ bool MainGameWindow::eventFilter(QObject *watched, QEvent *event)
     else
         return QMainWindow::eventFilter(watched, event);
 }
-
 
 void MainGameWindow::gameTimerEvent()
 {
@@ -233,4 +293,50 @@ void MainGameWindow::on_hintBtn_clicked()
     srcIcon->setStyleSheet(kIconHintStyle);
     dstIcon->setStyleSheet(kIconHintStyle);
 
+}
+
+void MainGameWindow::on_robot_btn_clicked()
+{
+    // 初始时不能自动玩
+    for (int i = 0; i < 4;i++)
+        if (game->getHint()[i] == -1)
+            return;
+
+    while (game->gameStatus == PLAYING)
+    {
+        // 连接生成提示
+
+        int srcX = game->getHint()[0];
+        int srcY = game->getHint()[1];
+        int dstX = game->getHint()[2];
+        int dstY = game->getHint()[3];
+
+        if(game->linkTwoTiles(srcX, srcY, dstX, dstY))
+        {
+            // 播放音效
+//            QSound::play(":/res/sound/pair.wav");
+
+            // 消除成功，隐藏掉
+            IconButton *icon1 = imageButton[srcY * MAX_COL + srcX];
+            IconButton *icon2 = imageButton[dstY * MAX_COL + dstX];
+
+            icon1->hide();
+            icon2->hide();
+
+            // 重绘
+            update();
+
+            // 检查是否胜利
+            if (game->isWin())
+                QMessageBox::information(this, "great", "you win");
+
+            // 每次检查一下是否僵局
+            if (game->isFrozen() && game->gameStatus == PLAYING)
+                QMessageBox::information(this, "oops", "dead game");
+
+
+
+            int *hints = game->getHint();
+        }
+    }
 }

@@ -51,8 +51,14 @@ public:
     GameStatus checkGameStatus(); // 判断获得游戏状态，是否输赢
     bool linkTwoTiles(int srcX, int srcY, int dstX,int dstY); // 连接起点和终点方块，连接是否成功
     bool isFrozen(); // 判断是否已经成为了僵局
+    bool isWin(); // 检查游戏是否结束
     int *getHint(); // 获得提示
     std::vector<PaintPoint> paintPoints; // 用于绘制的点
+
+    // 游戏状态和难度
+    GameStatus gameStatus;
+    GameLevel gameLevel;
+
 private:
     // 游戏地图，存储方块，0表示消失，1-其他数字表示图片标号
     int *gameMap;
@@ -60,9 +66,7 @@ private:
     // 游戏提示，存储2个点
     int *hintArray;
 
-    // 游戏状态和难度
-    GameStatus gameStatus;
-    GameLevel gameLevel;
+
 
     // 判断起点到终点的方块是否可以连接消除
     bool isCanLink(int srcX, int srcY, int dstX, int dstY);

@@ -36,6 +36,8 @@ void GameModel::startGame(GameLevel level)
     for (int i = 0; i < 4; i++)
         hintArray[i] = -1;
 
+    gameStatus = PLAYING;
+
     gameLevel = level;
 
     int gameLevelNum;
@@ -119,6 +121,17 @@ bool GameModel::isFrozen()
         }
     isFrozenMode = false;
 
+    return true;
+}
+
+bool GameModel::isWin()
+{
+    for (int i = 0; i < MAX_ROW * MAX_COL; i++)
+    {
+        if (gameMap[i])
+            return false;
+    }
+    gameStatus = WIN;
     return true;
 }
 
@@ -326,8 +339,9 @@ bool GameModel::canLinkWithTwoCorner(int srcX, int srcY, int dstX, int dstY)
         }
     }
 
-    // 边缘情况,（分开写便于记录路径)
-    if (srcX == 0 && dstX == 0)
+    // 边缘情况，从外边缘连接，注意方块不一定在边缘,（分开写便于记录路径)
+    if ((srcX == 0 || gameMap[srcY * MAX_COL + 0] == 0 && canLinkDirectly(srcX, srcY, 0, srcY))
+            && (dstX == 0 || gameMap[dstY * MAX_COL + 0] == 0 && canLinkDirectly(0, dstY, dstX, dstY)))
     {
         // 左
         if (!isFrozenMode)
@@ -344,7 +358,8 @@ bool GameModel::canLinkWithTwoCorner(int srcX, int srcY, int dstX, int dstY)
         return true;
     }
 
-    if (srcX == MAX_COL - 1 && dstX == MAX_COL - 1)
+    if ((srcX == MAX_COL - 1 || gameMap[srcY * MAX_COL + MAX_COL - 1] == 0 && canLinkDirectly(srcX, srcY, MAX_COL - 1, srcY))
+            && (dstX == MAX_COL - 1 || gameMap[dstY * MAX_COL + MAX_COL - 1] == 0 && canLinkDirectly(MAX_COL - 1, dstY, dstX, dstY)))
     {
         // 右
         if (!isFrozenMode)
@@ -359,7 +374,8 @@ bool GameModel::canLinkWithTwoCorner(int srcX, int srcY, int dstX, int dstY)
         }
         return true;
     }
-    if (srcY == 0 && dstY == 0)
+    if ((srcY == 0 || gameMap[srcX] == 0 && canLinkDirectly(srcX, srcY, srcX, 0))
+            && (dstY == 0 || gameMap[dstX] == 0 && canLinkDirectly(dstX, 0, dstX, dstY)))
     {
         // 上
         if (!isFrozenMode)
@@ -374,7 +390,8 @@ bool GameModel::canLinkWithTwoCorner(int srcX, int srcY, int dstX, int dstY)
         }
         return true;
     }
-    if (srcY == MAX_ROW - 1 && dstY == MAX_ROW - 1)
+    if ((srcY == MAX_ROW - 1 || gameMap[(MAX_ROW - 1) * MAX_ROW + srcX] == 0 && canLinkDirectly(srcX, srcY, srcX, MAX_ROW - 1))
+            && (dstY == MAX_ROW - 1 || gameMap[(MAX_ROW - 1) * MAX_ROW + dstX] == 0 && canLinkDirectly(dstX, MAX_ROW - 1, dstX, dstY)))
     {
         // 下
         if (!isFrozenMode)

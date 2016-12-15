@@ -51,6 +51,7 @@ private slots:
     void onIconButtonPressed(); // icon点击到响应
     void gameTimerEvent();
     void on_hintBtn_clicked(); // 提示按钮
+    void on_robot_btn_clicked(); // 机器人自动刷
 };
 
 #endif // MAIN_GAME_WINDOW_H
