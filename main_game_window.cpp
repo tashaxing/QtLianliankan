@@ -24,6 +24,9 @@ MainGameWindow::MainGameWindow(QWidget *parent) :
     curIcon(NULL)
 {
     ui->setupUi(this);
+    // 重载eventfilter安装到当前window（其实如果不适用ui文件的话直接可以在window的paintevent里面画）
+    ui->centralWidget->installEventFilter(this);
+
 //    setFixedSize(kLeftMargin * 2 + (kIconMargin + kIconSize) * MAX_COL, kTopMargin + (kIconMargin + kIconSize) * MAX_ROW);
     // 初始化游戏
     initGame();
@@ -79,7 +82,7 @@ void MainGameWindow::initGame()
     connect(gameTimer, SIGNAL(timeout()), this, SLOT(gameTimerEvent()));
     gameTimer->start(300);
 
-    // 播放背景音乐(QMediaPlayer只能播放绝对路径文件)
+    // 播放背景音乐(QMediaPlayer只能播放绝对路径文件),确保res文件在程序执行文件目录里而不是开发目录
     audioPlayer = new QMediaPlayer(this);
     QString curDir = QCoreApplication::applicationDirPath(); // 这个api获取路径在不同系统下不一样,mac 下需要截取路径
     QStringList sections = curDir.split(QRegExp("[/]"));
@@ -121,6 +124,9 @@ void MainGameWindow::onIconButtonPressed()
                 preIcon->hide();
                 curIcon->hide();
 
+                // 重绘
+                update();
+
                 // 每次检查一下是否僵局
                 if (game->isFrozen())
                     QMessageBox::information(this, "oops", "dead game");
@@ -153,22 +159,46 @@ void MainGameWindow::onIconButtonPressed()
     }
 }
 
-void MainGameWindow::paintEvent(QPaintEvent *event)
+bool MainGameWindow::eventFilter(QObject *watched, QEvent *event)
 {
-    QPainter painter(this);
-    painter.setPen(Qt::green);
-    qDebug() << game->paintPoints.size();
-//    for (size_t i = 0; i < game->paintPoints.size() - 1; i++)
-//    {
-//        PaintPoint p1 = game->paintPoints[i];
-//        PaintPoint p2 = game->paintPoints[i + 1];
-//        QPoint pos1 = imageButton[p1.y * MAX_COL + p1.x]->pos();
-//        QPoint pos2 = imageButton[p2.y * MAX_COL + p2.x]->pos();
+    // 重绘时会调用，可以手动调用
+    if (event->type() == QEvent::Paint)
+    {
+        QPainter painter(ui->centralWidget);
+        QPen pen;
+        pen.setColor(Qt::green);
+        pen.setWidth(5);
+        painter.setPen(pen);
 
-//        painter.drawLine(pos1, pos2);
-//    }
+        QString str;
+        for (int i = 0; i < game->paintPoints.size(); i++)
+        {
+            PaintPoint p = game->paintPoints[i];
+            str += "x:" + QString::number(p.x) + "y:" + QString::number(p.y) + "->";
+        }
+        qDebug() << str;
 
+        // 连接各点画线（注，qt中用标砖vector的size好像有点问题，需要类型转换，否则溢出）
+        for (int i = 0; i < int(game->paintPoints.size()) - 1; i++)
+        {
+            PaintPoint p1 = game->paintPoints[i];
+            PaintPoint p2 = game->paintPoints[i + 1];
+            QPoint btn_pos1 = imageButton[p1.y * MAX_COL + p1.x]->pos();
+            QPoint btn_pos2 = imageButton[p2.y * MAX_COL + p2.x]->pos();
+
+            // 中心点
+            QPoint pos1(btn_pos1.x() + kIconSize / 2, btn_pos1.y() + kIconSize / 2);
+            QPoint pos2(btn_pos2.x() + kIconSize / 2, btn_pos2.y() + kIconSize / 2);
+
+            painter.drawLine(pos1, pos2);
+        }
+
+        return true;
+    }
+    else
+        return QMainWindow::eventFilter(watched, event);
 }
+
 
 void MainGameWindow::gameTimerEvent()
 {

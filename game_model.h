@@ -29,7 +29,7 @@ enum GameLevel
     HARD
 };
 
-// 用于绘制线段的点
+// 用于绘制线段的连接点(其实应该统一用这个结构体的，代码有待优化)
 struct PaintPoint
 {
     PaintPoint(int _x, int _y) : x(_x), y (_y) {}
@@ -71,6 +71,8 @@ private:
     bool canLinkWithOneCorner(int srcX, int srcY, int dstX, int dstY);
     bool canLinkWithTwoCorner(int srcX, int srcY, int dstX, int dstY);
 
+    // 提示模式还是连接模式判断
+    bool isFrozenMode;
 
 };
 

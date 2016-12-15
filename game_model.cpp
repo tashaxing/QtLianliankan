@@ -69,6 +69,9 @@ void GameModel::startGame(GameLevel level)
         std::swap(gameMap[i], gameMap[randomID]);
     }
 
+    // 初始化判断模式
+    isFrozenMode = false;
+
     // 初始化绘制点
     paintPoints.clear();
 }
@@ -100,6 +103,7 @@ bool GameModel::isFrozen()
             int dstY = j / MAX_COL;
 
             // 只要能找到可以连接的就不为僵局
+            isFrozenMode = true;
             if (isCanLink(srcX, srcY, dstX, dstY))
             {
                 // 记录第一个可以连接的hint
@@ -108,9 +112,12 @@ bool GameModel::isFrozen()
                 hintArray[2] = dstX;
                 hintArray[3] = dstY;
 
+                isFrozenMode = false;
+
                 return false;
             }
         }
+    isFrozenMode = false;
 
     return true;
 }
@@ -132,10 +139,14 @@ bool GameModel::canLinkDirectly(int srcX, int srcY, int dstX, int dstY)
             if (gameMap[MAX_COL * y + srcX])
                 return false;
 
-        // 记录点和路线
-        PaintPoint p1(srcX, srcY), p2(dstX, dstY);
-        paintPoints.push_back(p1);
-        paintPoints.push_back(p2);
+        if (!isFrozenMode)
+        {
+            // 记录点和路线
+            PaintPoint p1(srcX, srcY), p2(dstX, dstY);
+            paintPoints.clear();
+            paintPoints.push_back(p1);
+            paintPoints.push_back(p2);
+        }
 
         return true;
     }
@@ -149,9 +160,14 @@ bool GameModel::canLinkDirectly(int srcX, int srcY, int dstX, int dstY)
             if (gameMap[MAX_COL * srcY + x])
                 return false;
 
-        PaintPoint p1(srcX, srcY), p2(dstX, dstY);
-        paintPoints.push_back(p1);
-        paintPoints.push_back(p2);
+        if (!isFrozenMode)
+        {
+            PaintPoint p1(srcX, srcY), p2(dstX, dstY);
+            paintPoints.clear();
+            paintPoints.push_back(p1);
+            paintPoints.push_back(p2);
+        }
+
         return true;
     }
 
@@ -175,10 +191,16 @@ bool GameModel::canLinkWithOneCorner(int srcX, int srcY, int dstX, int dstY)
             // 右上角
             if (canLinkDirectly(srcX, srcY, dstX, srcY) && canLinkDirectly(dstX, srcY, dstX, dstY))
             {
-                PaintPoint p1(srcX, srcY), p2(dstX, srcY), p3(dstX, dstY);
-                paintPoints.push_back(p1);
-                paintPoints.push_back(p2);
-                paintPoints.push_back(p3);
+                // 只有连接模式才记录点
+                if (!isFrozenMode)
+                {
+                    PaintPoint p1(srcX, srcY), p2(dstX, srcY), p3(dstX, dstY);
+                    paintPoints.clear();
+                    paintPoints.push_back(p1);
+                    paintPoints.push_back(p2);
+                    paintPoints.push_back(p3);
+                }
+
                 return true;
             }
 
@@ -188,10 +210,15 @@ bool GameModel::canLinkWithOneCorner(int srcX, int srcY, int dstX, int dstY)
             // 左下角
             if (canLinkDirectly(srcX, srcY, srcX, dstY) && canLinkDirectly(srcX, dstY, dstX, dstY))
             {
-                PaintPoint p1(srcX, srcY), p2(srcX, dstY), p3(dstX, dstY);
-                paintPoints.push_back(p1);
-                paintPoints.push_back(p2);
-                paintPoints.push_back(p3);
+                if (!isFrozenMode)
+                {
+                    PaintPoint p1(srcX, srcY), p2(srcX, dstY), p3(dstX, dstY);
+                    paintPoints.clear();
+                    paintPoints.push_back(p1);
+                    paintPoints.push_back(p2);
+                    paintPoints.push_back(p3);
+                }
+
                 return true;
             }
 
@@ -204,10 +231,15 @@ bool GameModel::canLinkWithOneCorner(int srcX, int srcY, int dstX, int dstY)
             // 左上角
             if (canLinkDirectly(srcX, srcY, srcX, dstY) && canLinkDirectly(srcX, dstY, dstX, dstY))
             {
-                PaintPoint p1(srcX, srcY), p2(srcX, dstY), p3(dstX, dstY);
-                paintPoints.push_back(p1);
-                paintPoints.push_back(p2);
-                paintPoints.push_back(p3);
+                if (!isFrozenMode)
+                {
+                    PaintPoint p1(srcX, srcY), p2(srcX, dstY), p3(dstX, dstY);
+                    paintPoints.clear();
+                    paintPoints.push_back(p1);
+                    paintPoints.push_back(p2);
+                    paintPoints.push_back(p3);
+                }
+
                 return true;
             }
 
@@ -217,10 +249,15 @@ bool GameModel::canLinkWithOneCorner(int srcX, int srcY, int dstX, int dstY)
             // 右下角
             if (canLinkDirectly(srcX, srcY, dstX, srcY) && canLinkDirectly(dstX, srcY, dstX, dstY))
             {
-                PaintPoint p1(srcX, srcY), p2(dstX, srcY), p3(dstX, dstY);
-                paintPoints.push_back(p1);
-                paintPoints.push_back(p2);
-                paintPoints.push_back(p3);
+                if (!isFrozenMode)
+                {
+                    PaintPoint p1(srcX, srcY), p2(dstX, srcY), p3(dstX, dstY);
+                    paintPoints.clear();
+                    paintPoints.push_back(p1);
+                    paintPoints.push_back(p2);
+                    paintPoints.push_back(p3);
+                }
+
                 return true;
             }
 
@@ -248,7 +285,20 @@ bool GameModel::canLinkWithTwoCorner(int srcX, int srcY, int dstX, int dstY)
             if (gameMap[y * MAX_COL + srcX] == 0
                     && canLinkDirectly(srcX, srcY, srcX, y)
                     && canLinkWithOneCorner(srcX, y, dstX, dstY))
+            {
+                if (!isFrozenMode)
+                {
+                    PaintPoint p1(srcX, srcY), p2(srcX, y), p3(dstX, y), p4(dstX, dstY);
+                    paintPoints.clear();
+                    paintPoints.push_back(p1);
+                    paintPoints.push_back(p2);
+                    paintPoints.push_back(p3);
+                    paintPoints.push_back(p4);
+                }
+
                 return true;
+            }
+
         }
     }
 
@@ -259,19 +309,86 @@ bool GameModel::canLinkWithTwoCorner(int srcX, int srcY, int dstX, int dstY)
             if (gameMap[srcY * MAX_COL + x] == 0
                     && canLinkDirectly(srcX, srcY, x, srcY)
                     && canLinkWithOneCorner(x, srcY, dstX, dstY))
+            {
+                if (!isFrozenMode)
+                {
+                    PaintPoint p1(srcX, srcY), p2(x, srcY), p3(x, dstY), p4(dstX, dstY);
+                    paintPoints.clear();
+                    paintPoints.push_back(p1);
+                    paintPoints.push_back(p2);
+                    paintPoints.push_back(p3);
+                    paintPoints.push_back(p4);
+
+                }
                 return true;
+            }
+
         }
     }
 
     // 边缘情况,（分开写便于记录路径)
     if (srcX == 0 && dstX == 0)
+    {
+        // 左
+        if (!isFrozenMode)
+        {
+            PaintPoint p1(srcX, srcY), p2(-1, srcY), p3(-1, dstY), p4(dstX, dstY);
+            paintPoints.clear();
+            paintPoints.push_back(p1);
+            paintPoints.push_back(p2);
+            paintPoints.push_back(p3);
+            paintPoints.push_back(p4);
+
+        }
+
         return true;
+    }
+
     if (srcX == MAX_COL - 1 && dstX == MAX_COL - 1)
+    {
+        // 右
+        if (!isFrozenMode)
+        {
+            PaintPoint p1(srcX, srcY), p2(MAX_COL, srcY), p3(MAX_COL, dstY), p4(dstX, dstY);
+            paintPoints.clear();
+            paintPoints.push_back(p1);
+            paintPoints.push_back(p2);
+            paintPoints.push_back(p3);
+            paintPoints.push_back(p4);
+
+        }
         return true;
+    }
     if (srcY == 0 && dstY == 0)
+    {
+        // 上
+        if (!isFrozenMode)
+        {
+            PaintPoint p1(srcX, srcY), p2(srcX, -1), p3(dstX, -1), p4(dstX, dstY);
+            paintPoints.clear();
+            paintPoints.push_back(p1);
+            paintPoints.push_back(p2);
+            paintPoints.push_back(p3);
+            paintPoints.push_back(p4);
+
+        }
         return true;
-    if (srcY == MAX_ROW - 1 && srcX == MAX_ROW - 1)
+    }
+    if (srcY == MAX_ROW - 1 && dstY == MAX_ROW - 1)
+    {
+        // 下
+        if (!isFrozenMode)
+        {
+            PaintPoint p1(srcX, srcY), p2(srcX, MAX_ROW), p3(dstX, MAX_ROW), p4(dstX, dstY);
+            paintPoints.clear();
+            paintPoints.push_back(p1);
+            paintPoints.push_back(p2);
+            paintPoints.push_back(p3);
+            paintPoints.push_back(p4);
+
+        }
         return true;
+    }
 
     return false;
 }

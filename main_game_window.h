@@ -34,7 +34,7 @@ public:
     explicit MainGameWindow(QWidget *parent = 0);
     virtual ~MainGameWindow();
 
-    virtual void paintEvent(QPaintEvent *event);
+    virtual bool eventFilter(QObject *watched, QEvent *event); // 事件过滤
 
 private:
     Ui::MainGameWindow *ui;
