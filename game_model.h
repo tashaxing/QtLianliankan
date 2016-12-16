@@ -66,8 +66,6 @@ private:
     // 游戏提示，存储2个点
     int *hintArray;
 
-
-
     // 判断起点到终点的方块是否可以连接消除
     bool isCanLink(int srcX, int srcY, int dstX, int dstY);
 

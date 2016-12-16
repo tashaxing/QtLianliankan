@@ -48,7 +48,7 @@ void MainGameWindow::initGame()
 {
     // 启动游戏
     game = new GameModel;
-    game->startGame(BASIC);
+    game->startGame(MEDIUM);
 
     // 添加button
     for(int i = 0; i < MAX_ROW * MAX_COL; i++)
@@ -221,7 +221,7 @@ bool MainGameWindow::eventFilter(QObject *watched, QEvent *event)
             PaintPoint p = game->paintPoints[i];
             str += "x:" + QString::number(p.x) + "y:" + QString::number(p.y) + "->";
         }
-        qDebug() << str;
+//        qDebug() << str;
 
         // 连接各点画线（注，qt中用标砖vector的size好像有点问题，需要类型转换，否则溢出）
         for (int i = 0; i < int(game->paintPoints.size()) - 1; i++)
@@ -302,11 +302,11 @@ void MainGameWindow::gameTimerEvent()
     if(ui->timeBar->value() == 0)
     {
         gameTimer->stop();
-//        QMessageBox::information(this, "game over", "play again>_<");
+        QMessageBox::information(this, "game over", "play again>_<");
     }
     else
     {
-        ui->timeBar->setValue(ui->timeBar->value() - 1);
+        ui->timeBar->setValue(ui->timeBar->value() - kGameTimerInterval);
     }
 
 }
@@ -358,6 +358,8 @@ void MainGameWindow::on_robot_btn_clicked()
 
             icon1->hide();
             icon2->hide();
+
+            game->paintPoints.clear();
 
             // 重绘
             update();

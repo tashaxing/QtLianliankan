@@ -5,6 +5,7 @@
 
 #include "game_model.h"
 
+
 // 游戏逻辑模型，与界面分离
 GameModel::GameModel() :
     gameStatus(PLAYING),
@@ -152,7 +153,7 @@ bool GameModel::canLinkDirectly(int srcX, int srcY, int dstX, int dstY)
             if (gameMap[MAX_COL * y + srcX])
                 return false;
 
-        if (!isFrozenMode)
+        if (!isFrozenMode) // 这里有坑，注意了
         {
             // 记录点和路线
             PaintPoint p1(srcX, srcY), p2(dstX, dstY);
@@ -196,9 +197,10 @@ bool GameModel::canLinkWithOneCorner(int srcX, int srcY, int dstX, int dstY)
         std::swap(srcY, dstY);
     }
 
-    // 先确定拐点，再确定直连线路,2种情况，4个点
+    // 先确定拐点，再确定直连线路,2种情况，4个点，每种情况逐个试，所以多个if顺序执行
     if (dstY > srcY)
     {
+
         if (gameMap[srcY * MAX_COL + dstX] == 0)
         {
             // 右上角
@@ -218,7 +220,7 @@ bool GameModel::canLinkWithOneCorner(int srcX, int srcY, int dstX, int dstY)
             }
 
         }
-        else if (gameMap[dstY * MAX_COL + srcX] == 0)
+        if (gameMap[dstY * MAX_COL + srcX] == 0)
         {
             // 左下角
             if (canLinkDirectly(srcX, srcY, srcX, dstY) && canLinkDirectly(srcX, dstY, dstX, dstY))
@@ -257,7 +259,7 @@ bool GameModel::canLinkWithOneCorner(int srcX, int srcY, int dstX, int dstY)
             }
 
         }
-        else if (gameMap[srcY * MAX_COL + dstX] == 0)
+        if (gameMap[srcY * MAX_COL + dstX] == 0)
         {
             // 右下角
             if (canLinkDirectly(srcX, srcY, dstX, srcY) && canLinkDirectly(dstX, srcY, dstX, dstY))
@@ -289,7 +291,7 @@ bool GameModel::canLinkWithTwoCorner(int srcX, int srcY, int dstX, int dstY)
         std::swap(srcY, dstY);
     }
 
-    // 两种情况，横向垂线和竖向垂线，以src点作为基准遍历，双折线由直线和一折现构成
+    // 两种情况，横向垂线和竖向垂线，以src点作为基准遍历，双折线由直线和一个拐点的折线构成
     // 常规情况
     for (int y = 0; y < MAX_ROW; y++)
     {
