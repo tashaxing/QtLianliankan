@@ -1,6 +1,6 @@
 #include <QDebug>
 #include <QSound>
-
+#include <QAction>
 #include <QMessageBox>
 #include <QPainter>
 #include <QLine>
@@ -34,21 +34,29 @@ MainGameWindow::MainGameWindow(QWidget *parent) :
     ui->centralWidget->installEventFilter(this);
 
 //    setFixedSize(kLeftMargin * 2 + (kIconMargin + kIconSize) * MAX_COL, kTopMargin + (kIconMargin + kIconSize) * MAX_ROW);
+    // 选关信号槽
+    connect(ui->actionBasic, SIGNAL(triggered(bool)), this, SLOT(createGameWithLevel()));
+    connect(ui->actionMedium, SIGNAL(triggered(bool)), this, SLOT(createGameWithLevel()));
+    connect(ui->actionHard, SIGNAL(triggered(bool)), this, SLOT(createGameWithLevel()));
+
     // 初始化游戏
-    initGame();
+    initGame(BASIC);
 }
 
 MainGameWindow::~MainGameWindow()
 {
-    delete game;
+    if (game)
+        delete game;
+
     delete ui;
 }
 
-void MainGameWindow::initGame()
+void MainGameWindow::initGame(GameLevel level)
 {
     // 启动游戏
+
     game = new GameModel;
-    game->startGame(MEDIUM);
+    game->startGame(level);
 
     // 添加button
     for(int i = 0; i < MAX_ROW * MAX_COL; i++)
@@ -377,4 +385,39 @@ void MainGameWindow::on_robot_btn_clicked()
             int *hints = game->getHint();
         }
     }
+}
+
+void MainGameWindow::createGameWithLevel()
+{
+    // 先析构之前的
+    if (game)
+    {
+        delete game;
+        for (int i = 0;i < MAX_ROW * MAX_COL; i++)
+        {
+            if (imageButton[i])
+               delete imageButton[i];
+        }
+    }
+
+    // 停止音乐
+    audioPlayer->stop();
+
+    // 重绘
+    update();
+
+    QAction *actionSender = (QAction *)dynamic_cast<QAction *>(sender());
+    if (actionSender == ui->actionBasic)
+    {
+        initGame(BASIC);
+    }
+    else if (actionSender == ui->actionMedium)
+    {
+        initGame(MEDIUM);
+    }
+    else if (actionSender == ui->actionHard)
+    {
+        initGame(HARD);
+    }
+
 }

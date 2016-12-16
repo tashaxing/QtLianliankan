@@ -76,6 +76,40 @@
     </property>
    </widget>
   </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>847</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuGame">
+    <property name="title">
+     <string>game</string>
+    </property>
+    <addaction name="actionBasic"/>
+    <addaction name="actionMedium"/>
+    <addaction name="actionHard"/>
+   </widget>
+   <addaction name="menuGame"/>
+  </widget>
+  <action name="actionBasic">
+   <property name="text">
+    <string>basic</string>
+   </property>
+  </action>
+  <action name="actionMedium">
+   <property name="text">
+    <string>medium</string>
+   </property>
+  </action>
+  <action name="actionHard">
+   <property name="text">
+    <string>hard</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

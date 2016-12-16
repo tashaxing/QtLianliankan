@@ -46,7 +46,7 @@ private:
 
     QMediaPlayer *audioPlayer; // 音乐播放器
 
-    void initGame(); // 初始化游戏
+    void initGame(GameLevel level); // 初始化游戏
 
 
 private slots:
@@ -55,6 +55,8 @@ private slots:
     void handleLinkEffect(); // 实现连接效果
     void on_hintBtn_clicked(); // 提示按钮
     void on_robot_btn_clicked(); // 机器人自动刷
+    void createGameWithLevel(); // 选中难度开始
+
 };
 
 #endif // MAIN_GAME_WINDOW_H
