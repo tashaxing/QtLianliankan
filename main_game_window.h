@@ -22,8 +22,8 @@ public:
         yID(-1)
     {
     }
-    int xID;
-    int yID;
+    int xID; // x 坐标
+    int yID; // y 坐标
 };
 
 class MainGameWindow : public QMainWindow
@@ -42,14 +42,17 @@ private:
     IconButton *imageButton[MAX_ROW * MAX_COL]; // 图片button数组
     QTimer *gameTimer; // 游戏计时器
     IconButton *preIcon, *curIcon; // 记录点击的icon
+    bool isLinking; // 维持一个连接状态的标志
 
     QMediaPlayer *audioPlayer; // 音乐播放器
 
     void initGame(); // 初始化游戏
 
+
 private slots:
     void onIconButtonPressed(); // icon点击到响应
-    void gameTimerEvent();
+    void gameTimerEvent(); // 游戏计时回调
+    void handleLinkEffect(); // 实现连接效果
     void on_hintBtn_clicked(); // 提示按钮
     void on_robot_btn_clicked(); // 机器人自动刷
 };

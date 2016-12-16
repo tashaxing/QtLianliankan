@@ -1,6 +1,6 @@
 #include <QDebug>
 #include <QSound>
-#include <QTimer>
+
 #include <QMessageBox>
 #include <QPainter>
 #include <QLine>
@@ -15,6 +15,11 @@ const int kLeftMargin = 50;
 const QString kIconReleasedStyle = "";
 const QString kIconClickedStyle = "background-color: rgba(255, 255, 12, 161)";
 const QString kIconHintStyle = "background-color: rgba(255, 0, 0, 255)";
+
+
+const int kGameTimeTotal = 5 * 60 * 1000; // 总时间
+const int kGameTimerInterval = 300;
+const int kLinkTimerDelay = 700;
 // -------------------------- //
 
 // 游戏主界面
@@ -43,7 +48,7 @@ void MainGameWindow::initGame()
 {
     // 启动游戏
     game = new GameModel;
-    game->startGame(MEDIUM);
+    game->startGame(BASIC);
 
     // 添加button
     for(int i = 0; i < MAX_ROW * MAX_COL; i++)
@@ -72,20 +77,20 @@ void MainGameWindow::initGame()
         }
         else
             imageButton[i]->hide();
-
-
-
     }
 
     // 进度条
-    ui->timeBar->setMaximum(100);
+    ui->timeBar->setMaximum(kGameTimeTotal);
     ui->timeBar->setMinimum(0);
-    ui->timeBar->setValue(100);
+    ui->timeBar->setValue(kGameTimeTotal);
 
-    // 启动计时器
+    // 游戏计时器
     gameTimer = new QTimer(this);
     connect(gameTimer, SIGNAL(timeout()), this, SLOT(gameTimerEvent()));
-    gameTimer->start(300);
+    gameTimer->start(kGameTimerInterval);
+
+    // 连接状态值
+    isLinking = false;
 
     // 播放背景音乐(QMediaPlayer只能播放绝对路径文件),确保res文件在程序执行文件目录里而不是开发目录
     audioPlayer = new QMediaPlayer(this);
@@ -102,6 +107,16 @@ void MainGameWindow::initGame()
 
 void MainGameWindow::onIconButtonPressed()
 {
+    // 如果当前有方块在连接，不能点击方块
+    // 因为涉及到多线，可能还要维护队列，有点复杂，就先这么简单处理一下
+    if (isLinking)
+    {
+        // 播放音效
+        QSound::play(":/res/sound/release.wav");
+        return;
+    }
+
+
     // 记录当前点击的icon
     curIcon = dynamic_cast<IconButton *>(sender());
 
@@ -122,15 +137,17 @@ void MainGameWindow::onIconButtonPressed()
             curIcon->setStyleSheet(kIconClickedStyle);
             if(game->linkTwoTiles(preIcon->xID, preIcon->yID, curIcon->xID, curIcon->yID))
             {
+                // 锁住当前状态
+                isLinking = true;
+
                 // 播放音效
                 QSound::play(":/res/sound/pair.wav");
 
-                // 消除成功，隐藏掉
-                preIcon->hide();
-                curIcon->hide();
-
                 // 重绘
                 update();
+
+                // 延迟后实现连接效果
+                QTimer::singleShot(kLinkTimerDelay, this, SLOT(handleLinkEffect()));
 
                 // 每次检查一下是否僵局
                 if (game->isFrozen())
@@ -150,10 +167,11 @@ void MainGameWindow::onIconButtonPressed()
                 // 消除失败，恢复
                 preIcon->setStyleSheet(kIconReleasedStyle);
                 curIcon->setStyleSheet(kIconReleasedStyle);
-            }
-            preIcon = NULL;
-            curIcon = NULL;
 
+                // 指针置空，用于下次点击判断
+                preIcon = NULL;
+                curIcon = NULL;
+            }
         }
         else if(curIcon == preIcon)
         {
@@ -168,6 +186,23 @@ void MainGameWindow::onIconButtonPressed()
     }
 }
 
+void MainGameWindow::handleLinkEffect()
+{
+    // 消除成功，隐藏掉，并析构
+    game->paintPoints.clear();
+    preIcon->hide();
+    curIcon->hide();
+
+    preIcon = NULL;
+    curIcon = NULL;
+
+    // 重绘
+    update();
+
+    // 恢复状态
+    isLinking = false;
+}
+
 bool MainGameWindow::eventFilter(QObject *watched, QEvent *event)
 {
     // 重绘时会调用，可以手动调用
@@ -175,7 +210,8 @@ bool MainGameWindow::eventFilter(QObject *watched, QEvent *event)
     {
         QPainter painter(ui->centralWidget);
         QPen pen;
-        pen.setColor(Qt::green);
+        QColor color(rand() % 256, rand() % 256, rand() % 256);
+        pen.setColor(color);
         pen.setWidth(5);
         painter.setPen(pen);
 

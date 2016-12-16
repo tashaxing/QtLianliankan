@@ -390,8 +390,8 @@ bool GameModel::canLinkWithTwoCorner(int srcX, int srcY, int dstX, int dstY)
         }
         return true;
     }
-    if ((srcY == MAX_ROW - 1 || gameMap[(MAX_ROW - 1) * MAX_ROW + srcX] == 0 && canLinkDirectly(srcX, srcY, srcX, MAX_ROW - 1))
-            && (dstY == MAX_ROW - 1 || gameMap[(MAX_ROW - 1) * MAX_ROW + dstX] == 0 && canLinkDirectly(dstX, MAX_ROW - 1, dstX, dstY)))
+    if ((srcY == MAX_ROW - 1 || gameMap[(MAX_ROW - 1) * MAX_COL + srcX] == 0 && canLinkDirectly(srcX, srcY, srcX, MAX_ROW - 1))
+            && (dstY == MAX_ROW - 1 || gameMap[(MAX_ROW - 1) * MAX_COL + dstX] == 0 && canLinkDirectly(dstX, MAX_ROW - 1, dstX, dstY)))
     {
         // 下
         if (!isFrozenMode)
